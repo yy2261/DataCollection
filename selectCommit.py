@@ -13,8 +13,12 @@ def getCommit(url, text, commitList, f):
 			commitTitle = line.split('title=')[1]
 			commitLink = line.split('<a href="')[1].split('" ')[0]
 			commitList.append([commitTitle, commitLink])
-			if 'Update' in line:
-				f.write(commitTitle+'\n')
+			if 'inject' in line or 'leak' in line or 'overflow' in line:
+				try:
+					f.write(commitTitle+'\n')
+				except:
+					f.write('some illegal characters...\n')
+					
 				f.write('https://github.com/'+commitLink+'\n\n')
 
 
@@ -29,14 +33,15 @@ def getNum(url):
 	for para in paras:
 		if 'class="commits"' in para:
 			num = para.split('<span class="num text-emphasized">')[1].split('</span>')[0].strip(' ').strip('\n').strip(' ')
-			return int(num)
+			return num
 
 def selectCommit(url, filename):
 	f = open(filename, 'w')
-	num = getNum(url)
-	commitList = []
-	print str(num)+' commits...'
+	if '?' not in url:
+		num = getNum(url)
+		print num+' commits...'
 	oldurl = ''
+	commitList = []
 	while oldurl != url:
 		res = requests.get(url)
 		getCommit(url, res.text, commitList, f)
